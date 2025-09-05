@@ -8,8 +8,7 @@ public class UserHandling {
 
         private ArrayList<User> users = new ArrayList<>();
 
-        public UserHandling(ArrayList users){
-                this.users = users;
+        public UserHandling(){
         }
       
         //Agregar Usuarios
