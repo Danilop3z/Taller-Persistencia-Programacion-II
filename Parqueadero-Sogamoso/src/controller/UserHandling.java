@@ -6,7 +6,7 @@ import model.User;
 
 public class UserHandling {
 
-        private ArrayList<User> users = new ArrayList<>();
+        private static ArrayList<User> users = new ArrayList<>();
 
         public UserHandling(){
         }
@@ -18,7 +18,7 @@ public class UserHandling {
         }
 
         //Listar Usuarios
-        public void listUser() {
+        public static void listUser() {
                 if (users.isEmpty()) {
                         System.out.println("No hay Usuarios Registrados.");
                 } else {

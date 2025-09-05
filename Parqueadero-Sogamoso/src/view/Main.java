@@ -11,14 +11,13 @@ public class Main {
         do{
         System.out.println("===Bienvenido, por favor seleccione la acción===");
         System.out.println("1.Ingresar");
-        System.out.println("2. Registrarse");
+        System.out.println("2.Registrarse");
         a = sn.nextInt();
-
+        sn.nextLine();
         switch (a) {
             case 2:
                 System.out.println("Ingrese Nombre de Usuario");
-                String userName = sn.next();
-                
+                String userName = sn.nextLine();
                 System.out.println("Ingrese la contraseña para el usuario");
                 String pass = sn.next();
                 User u = new User(userName, pass);
@@ -26,11 +25,11 @@ public class Main {
                 break;
         
             case 1:
-                System.out.println();
+                UserHandling.listUser();
                 break;
         }
 
-    }while (a != 2);       
-        
+    }while (a != 3);
+
 }
 }
