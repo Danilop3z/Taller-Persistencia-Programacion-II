@@ -2,7 +2,7 @@
 .idea/
 *.iml/
 out/
-
+*.iml
 # Archivos de Vscode 
 .vscode/
 
