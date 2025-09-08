@@ -10,7 +10,16 @@ public class UserHandling {
 
         public UserHandling(){
         }
-      
+
+    // Verificar login
+    public boolean login(String userName, String password) {
+        for (User u : users) {
+            if (u.getUserName().equals(userName) && u.getPassword().equals(password)) {
+                return true;
+            }
+        }
+        return false;
+    }
         //Agregar Usuarios
         public void addUser(User u) { 
                 users.add(u);
