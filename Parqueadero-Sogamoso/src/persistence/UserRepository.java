@@ -1,70 +1,103 @@
 package persistence;
 
 import model.User;
-import java.io.*;
+import interfaces.IActionsFile;
+import enums.ETypeFile;
+import constants.CommonConstants;
+import java.io.ObjectOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
-public class UserRepository {
-    // Guardamos dentro de resources/data (no en src para evitar líos con compilación)
-    private static final String FILE_PATH = "Parqueadero-Sogamoso/resources/data/users.dat";
+public class UserRepository extends FilePlain implements IActionsFile {
 
-    /**
-     * Guarda la lista completa de usuarios en el archivo
-     */
-    public static void saveUsers(List<User> users) {
-        try {
-            File file = new File(FILE_PATH);
+    private List<User> listUsers;
 
-            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-                System.out.println("✅ Guardando usuarios en: " + file.getAbsolutePath());
-                oos.writeObject(users);
+    public UserRepository() {
+        this.listUsers = new ArrayList<User>();
+    }
+
+    public Boolean loginCheck(String userName, String pass) {
+        for (User u : listUsers) {
+            if (u.getUserName().equals(userName) && u.getPassword()
+                    .equals(pass)) {
+                return true;
             }
-        } catch (IOException e) {
-            System.err.println("❌ Error guardando usuarios: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public Boolean addUser(User user) {
+        if (Objects.isNull(this.findUserByUsername(user.getUserName()))) {
+            this.listUsers.add(user);
+            return true;
+        }
+        return false;
+    }
+
+    private User findUserByUsername(String userName) {
+        for (User user : this.listUsers) {
+            if (user.getUserName().equals(userName)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void loadFile(ETypeFile eTypeFile) {
+        if(eTypeFile.equals(ETypeFile.SER)) {
+            this.loadFileSerializate();
         }
     }
 
-    /**
-     * Carga todos los usuarios desde el archivo
-     */
-    @SuppressWarnings("unchecked")
-    public static List<User> loadUsers() {
-        List<User> users = new ArrayList<>();
-        File file = new File(FILE_PATH);
-
-        if (!file.exists()) {
-            return users; // retorna vacío si aún no existe
-        }
-
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-            users = (List<User>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("❌ Error leyendo usuarios: " + e.getMessage());
-        }
-
-        return users;
-    }
-
-    /**
-     * Busca si el usuario y contraseña coinciden (para login)
-     */
-    public static boolean validateLogin(String username, String password) {
-        return loadUsers().stream()
-                .anyMatch(u -> u.getUserName().equals(username) && u.getPassword().equals(password));
-    }
-
-    /**
-     * Agrega un nuevo usuario al archivo (si no existe)
-     */
-    public static void addUser(User user) {
-        List<User> users = loadUsers();
-        boolean exists = users.stream().anyMatch(u -> u.getUserName().equals(user.getUserName()));
-        if (!exists) {
-            users.add(user);
-            saveUsers(users);
-        } else {
-            System.out.println("⚠️ Usuario ya existe.");
+    @Override
+    public void dumpFile(ETypeFile eTypeFile) {
+        if(eTypeFile.equals(ETypeFile.SER)) {
+            this.dumpFileSerializate();
         }
     }
+
+
+    private void dumpFileSerializate() {
+        try (FileOutputStream fileOut = new FileOutputStream(
+                this.config.getPathFiles()
+                        .concat(this.config.getNameFileSer()));
+             ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
+            out.writeObject(this.listUsers);
+        } catch (IOException i) {
+            i.printStackTrace();
+        }
+    }
+
+    private void loadFileSerializate() {
+        try (FileInputStream fileIn = new FileInputStream(
+                this.config.getPathFiles()
+                        .concat(this.config.getNameFileSer()));
+             ObjectInputStream in = new ObjectInputStream(fileIn)) {
+            this.listUsers = (List<User>) in.readObject();
+        } catch (IOException i) {
+            i.printStackTrace();
+        } catch (ClassNotFoundException c) {
+            c.printStackTrace();
+        }
+    }
+    public List<User> getListUsers() {
+        return listUsers;
+    }
+
+    public void setListContacts(List<User> listUsers) {
+        this.listUsers = listUsers;
+    }
+
 }
+
+

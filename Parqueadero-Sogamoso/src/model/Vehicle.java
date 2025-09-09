@@ -1,7 +1,5 @@
 package model;
 
-import persistence.VehicleRateRepository;
-
 public class Vehicle {
     private String licensePlate;//
     private String typeVehicle; // vehiclerate y recordparking
@@ -10,18 +8,6 @@ public class Vehicle {
     private String color;
     private double pricePerHour; //se obtiene de vehicleRate
 
-    // Constructor usado al crear desde menú (no se pasa pricePerHour, se calcula con VehicleRateRepository)
-    public Vehicle(String licensePlate, String typeVehicle, String owner, String model, String color) {
-        this.licensePlate = licensePlate;
-        this.typeVehicle = typeVehicle;
-        this.owner = owner;
-        this.model = model;
-        this.color = color;
-        // Aquí se obtiene automáticamente desde VehicleRateRepository
-        this.pricePerHour = persistence.VehicleRateRepository.getPriceByType(typeVehicle);
-    }
-
-    // Constructor usado cuando cargamos desde XML (ya conocemos el pricePerHour)
     public Vehicle(String licensePlate, String typeVehicle, String owner, String model, String color, double pricePerHour) {
         this.licensePlate = licensePlate;
         this.typeVehicle = typeVehicle;

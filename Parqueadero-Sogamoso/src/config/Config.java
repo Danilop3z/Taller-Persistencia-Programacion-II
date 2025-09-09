@@ -12,11 +12,11 @@ public class Config {
 
     private String nameFileCSV;
 
-    private String nameFileJSON;
+    private String nameFileJson;
 
     private String nameFileXML;
 
-    private String nameFileSER;
+    private String nameFileSer;
 
     private Properties properties;
 
@@ -27,9 +27,9 @@ public class Config {
             properties.load(entrada);
             this.pathFiles = properties.getProperty("files");
             this.nameFileCSV = properties.getProperty("csv");
-            this.nameFileSER = properties.getProperty("ser");
+            this.nameFileSer = properties.getProperty("ser");
             this.nameFileXML = properties.getProperty("xml");
-            this.nameFileJSON = properties.getProperty("json");
+            this.nameFileJson = properties.getProperty("json");
 
         }catch (IOException ex) {
             System.err.println("Error al cargar el archivo properties de configuracion: " + ex.getMessage());
@@ -59,12 +59,12 @@ public class Config {
         this.nameFileCSV = nameFileCSV;
     }
 
-    public String getNameFileJSON() {
-        return nameFileJSON;
+    public String getNameFileJson() {
+        return nameFileJson;
     }
 
-    public void setNameFileJSON(String nameFileJSON) {
-        this.nameFileJSON = nameFileJSON;
+    public void setNameFileJson(String nameFileJson) {
+        this.nameFileJson = nameFileJson;
     }
 
     public String getNameFileXML() {
@@ -75,11 +75,11 @@ public class Config {
         this.nameFileXML = nameFileXML;
     }
 
-    public String getNameFileSER() {
-        return nameFileSER;
+    public String getNameFileSer() {
+        return nameFileSer;
     }
 
-    public void setNameFileSER(String nameFileSER) {
-        this.nameFileSER = nameFileSER;
+    public void setNameFileSer(String nameFileSer) {
+        this.nameFileSer = nameFileSer;
     }
 }

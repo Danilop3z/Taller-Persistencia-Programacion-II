@@ -1,174 +1,62 @@
 package persistence;
 
+import model.User;
+import interfaces.IActionsFile;
+import enums.ETypeFile;
+import constants.CommonConstants;
 import model.Vehicle;
-import org.w3c.dom.*;
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ObjectOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
-public class VehicleRepository {
-    private static final String FILE_PATH = "Parqueadero-Sogamoso/resources/data/vehicles.xml";
+public class VehicleRepository extends FilePlain implements IActionsFile{
 
-    /**
-     * Crea el archivo XML si no existe
-     */
-    private static void createFileIfNotExists() {
-        File file = new File(FILE_PATH);
-        if (!file.exists()) {
-            try {
-                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-                Document doc = dBuilder.newDocument();
+        private List<Vehicle> listVehicles;
 
-                Element rootElement = doc.createElement("Vehicles");
-                doc.appendChild(rootElement);
-
-                saveDocument(doc);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Guarda un Document XML en disco
-     */
-    private static void saveDocument(Document doc) throws TransformerException {
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        DOMSource source = new DOMSource(doc);
-        StreamResult result = new StreamResult(new File(FILE_PATH));
-        transformer.transform(source, result);
-    }
-
-    /**
-     * Carga todos los vehículos
-     */
-    public static List<Vehicle> loadVehicles() {
-        createFileIfNotExists();
-        List<Vehicle> vehicles = new ArrayList<>();
-
-        try {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(new File(FILE_PATH));
-            doc.getDocumentElement().normalize();
-
-            NodeList nList = doc.getElementsByTagName("Vehicle");
-
-            for (int i = 0; i < nList.getLength(); i++) {
-                Node node = nList.item(i);
-
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    Element e = (Element) node;
-
-                    String licensePlate = e.getElementsByTagName("licensePlate").item(0).getTextContent();
-                    String typeVehicle = e.getElementsByTagName("typeVehicle").item(0).getTextContent();
-                    String owner = e.getElementsByTagName("owner").item(0).getTextContent();
-                    String model = e.getElementsByTagName("model").item(0).getTextContent();
-                    String color = e.getElementsByTagName("color").item(0).getTextContent();
-                    double pricePerHour = Double.parseDouble(e.getElementsByTagName("pricePerHour").item(0).getTextContent());
-
-                    vehicles.add(new Vehicle(licensePlate, typeVehicle, owner, model, color, pricePerHour));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        public VehicleRepository() {
+            this.listVehicles = new ArrayList<Vehicle>();
         }
 
-        return vehicles;
+    @Override
+    public void loadFile(ETypeFile eTypeFile) {
+
     }
 
-    /**
-     * Agrega un vehículo nuevo
-     */
-    public static void addVehicle(Vehicle vehicle) {
-        createFileIfNotExists();
+    @Override
+    public void dumpFile(ETypeFile eTypeFile) {
 
-        try {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(new File(FILE_PATH));
-
-            Element root = doc.getDocumentElement();
-
-            Element vElement = doc.createElement("Vehicle");
-
-            Element plate = doc.createElement("licensePlate");
-            plate.appendChild(doc.createTextNode(vehicle.getLicensePlate()));
-            vElement.appendChild(plate);
-
-            Element type = doc.createElement("typeVehicle");
-            type.appendChild(doc.createTextNode(vehicle.getTypeVehicle()));
-            vElement.appendChild(type);
-
-            Element owner = doc.createElement("owner");
-            owner.appendChild(doc.createTextNode(vehicle.getOwner()));
-            vElement.appendChild(owner);
-
-            Element model = doc.createElement("model");
-            model.appendChild(doc.createTextNode(vehicle.getModel()));
-            vElement.appendChild(model);
-
-            Element color = doc.createElement("color");
-            color.appendChild(doc.createTextNode(vehicle.getColor()));
-            vElement.appendChild(color);
-
-            Element price = doc.createElement("pricePerHour");
-            price.appendChild(doc.createTextNode(String.valueOf(vehicle.getPricePerHour())));
-            vElement.appendChild(price);
-
-            root.appendChild(vElement);
-
-            saveDocument(doc);
-        } catch (Exception e) {
-            e.printStackTrace();
+    }
+    private void dumpFileXML() {
+        String rutaArchivo = config.getPathFiles().concat(
+                config.getNameFileXML());
+        List<String> records = new ArrayList<>();
+        records.add("<XML version=\"1.0\" encoding=\"UTF-8\">");
+        for (Vehicle vehicle = this.listVehicles) {
+            records.add("<vehicle>");
+            records.add("\t<licensePlate>"+vehicle.getLicensePlate()"</licensePlate>");
+            records.add("\t<typeVehicle>"+vehicle.getTypeVehicle()+"</typeVehicle>");
+            records.add("\t<owner>"+vehicle.getOwner()+"</owner>");
+            records.add("\t<model>"+vehicle.getModel()+"</model>");
+            records.add("\t<color>"+vehicle.getColor()+"</color>");
+            records.add("\t<pricePerHour>"+vehicle.getPricePerHour()+"</pricePerHour>");
+            records.add("</vehicle>");
         }
+        records.add("</XML>");
+        this.writer(rutaArchivo, records);
     }
 
-    /**
-     * Elimina un vehículo por placa
-     */
-    public static void deleteVehicle(String licensePlate) {
-        createFileIfNotExists();
-
-        try {
-            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = dBuilder.parse(new File(FILE_PATH));
-
-            NodeList nList = doc.getElementsByTagName("Vehicle");
-
-            for (int i = 0; i < nList.getLength(); i++) {
-                Node node = nList.item(i);
-
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    Element e = (Element) node;
-                    String plate = e.getElementsByTagName("licensePlate").item(0).getTextContent();
-
-                    if (plate.equalsIgnoreCase(licensePlate)) {
-                        e.getParentNode().removeChild(e);
-                        break;
-                    }
-                }
-            }
-
-            saveDocument(doc);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Actualiza los datos de un vehículo (se reemplaza por la placa)
-     */
-    public static void updateVehicle(Vehicle updatedVehicle) {
-        deleteVehicle(updatedVehicle.getLicensePlate());
-        addVehicle(updatedVehicle);
-    }
 }
-
